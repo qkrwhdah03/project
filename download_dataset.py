@@ -83,7 +83,7 @@ def get_face(
 
 def equirect_to_cubemap(
     image: np.array,
-    face_size: int = 512
+    face_size: int
 )-> Dict[str, np.array]:
     faces = {}
 
@@ -99,7 +99,8 @@ def equirect_to_cubemap(
     return faces
 
 def convert_cubemap(
-    save_dir: str
+    save_dir: str,
+    face_size: int
 )-> None:
     dataset = StreetViewDataset(save_dir)
 
@@ -110,16 +111,25 @@ def convert_cubemap(
         image = dataset.get(i)
         image = np.array(image) # (H, W, C), 0~255 uint8 
 
-        faces = equirect_to_cubemap(image)
+        faces = equirect_to_cubemap(image, face_size)
 
         for key, face in faces.items():
             save_path = os.path.join(new_save_dir, f"{i}_{key}.png")
             Image.fromarray(face).save(save_path)
-        break
     
     print(f"Generating cubemap done. Save images at {new_save_dir}")
     return
 
 
 if __name__ == "__main__":
-    convert_cubemap("/root/project/data")
+
+    import argparse 
+    parser = argparse.ArgumentParser(description="Convert equirectangular StreetView images to cubemap faces.")
+    parser.add_argument("--save_dir", type=str, default="/root/project/data",
+                        help="Directory to save cubemap images and/or cache dataset")
+    parser.add_argument("--face_size", type=int, default=512,
+                        help="Resolution of each cubemap face (default: 512)")
+    
+    args = parser.parse_args()
+
+    convert_cubemap(args.save_dir, args.face_size)

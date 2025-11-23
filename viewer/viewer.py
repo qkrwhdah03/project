@@ -96,10 +96,3 @@ class CubeMapViewer:
     def run(self)-> None:
         print("Viewer running at http://localhost:8080")
         wait()
-
-
-if __name__ == "__main__":
-    viewer = CubeMapViewer(cube_render_x= 100, cube_render_y= 150, cube_render_z= 100)
-    cubemap = CubeMap(name="cubemap", dir_path="/root/project/data/cubemap", prefix="0")
-    viewer.add_cubemap(cubemap)
-    viewer.run()

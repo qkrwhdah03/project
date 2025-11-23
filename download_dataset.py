@@ -87,14 +87,14 @@ def equirect_to_cubemap(
 )-> Dict[str, np.array]:
     faces = {}
 
-    faces["posx"] = get_face(image, face_size, np.array([1,0,0]),  np.array([0,-1,0]))
-    faces["negx"] = get_face(image, face_size, np.array([-1,0,0]), np.array([0,-1,0]))
+    faces["posx"] = get_face(image, face_size, np.array([1., 0., 0.]),  np.array([0., -1., 0.]))
+    faces["negx"] = get_face(image, face_size, np.array([-1., 0., 0.]), np.array([0., -1., 0.]))
 
-    faces["posy"] = get_face(image, face_size, np.array([0,1,0]),  np.array([0,0,1]))
-    faces["negy"] = get_face(image, face_size, np.array([0,-1,0]), np.array([0,0,-1]))
+    faces["posy"] = get_face(image, face_size, np.array([0., 1., 0.]),  np.array([0., 0., 1.]))
+    faces["negy"] = get_face(image, face_size, np.array([0., -1., 0.]), np.array([0., 0., -1.]))
 
-    faces["posz"] = get_face(image, face_size, np.array([0,0,1]),  np.array([0,-1,0]))
-    faces["negz"] = get_face(image, face_size, np.array([0,0,-1]), np.array([0,-1,0]))
+    faces["posz"] = get_face(image, face_size, np.array([0., 0., 1.]),  np.array([0., -1., 0.]))
+    faces["negz"] = get_face(image, face_size, np.array([0., 0., -1.]), np.array([0., -1., 0.]))
 
     return faces
 

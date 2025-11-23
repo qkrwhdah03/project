@@ -82,7 +82,7 @@ class CubeMapViewer:
     
     def add_cubemap(self, cubemap: CubeMap)-> None:
         for key in self.keys:
-            viewer.server.scene.add_image(
+            self.server.scene.add_image(
                 name = f"{cubemap.name}_{key}",
                 image = cubemap.get(key),
                 render_width = self.width[key],

@@ -5,6 +5,8 @@ from diffusers import StableDiffusionPipeline
 from diffusers.pipelines.stable_diffusion.pipeline_output import BaseOutput
 from dataclasses import dataclass
 from norm import patch_groupnorm
+from attn import swap_transformer_blocks
+from utils import patch_unet
 
 # Stable diffusion 2
 '''
@@ -33,6 +35,12 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         model_id = "Manojb/stable-diffusion-2-base"
         pipeline = super().from_pretrained(model_id, **kwargs)
 
+        if pipeline.unet.config.in_channels != 7:
+            # Is a base SD model, patch input conv as well
+            patch_unet(pipeline.unet, in_channels=7)
+        else:
+            # Apply attention patches (swap BasicTransformerBlock -> CubeDiffTransformerBlock)
+            swap_transformer_blocks(pipeline.unet)
 
         # Synchronized GroupNorm
         patch_groupnorm(pipeline.vae)

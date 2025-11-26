@@ -52,17 +52,21 @@ def get_face(
     image: np.array,
     face_size: int,
     view: np.array, # unit vector
-    up: np.array # unit vector
+    up: np.array, # unit vector
+    fov: float
 )-> np.array: # (face_size, face_size, 3)
     
+    theta = (fov / 2) * np.pi / 180
+    scale = np.tan(theta)
+    
     left = np.cross(up, view) # unit vector
-    left_top = view + up + left
+    left_top = view + (up + left) * scale
     # right_top = view + up - left
     # left_bottom = view - up + left
     # right_bottom = view - up - left
 
-    v = -up
-    u = -left
+    v = -up * scale
+    u = -left * scale
     n = np.arange(1, 2 * face_size, 2) / face_size
     gx, gy = np.meshgrid(n, n)
     rays = ( 
@@ -83,25 +87,28 @@ def get_face(
 
 def equirect_to_cubemap(
     image: np.array,
-    face_size: int
+    face_size: int,
+    fov: float
 )-> Dict[str, np.array]:
     faces = {}
 
-    faces["posx"] = get_face(image, face_size, np.array([1., 0., 0.]),  np.array([0., -1., 0.]))
-    faces["negx"] = get_face(image, face_size, np.array([-1., 0., 0.]), np.array([0., -1., 0.]))
+    faces["posx"] = get_face(image, face_size, np.array([1., 0., 0.]),  np.array([0., -1., 0.]), fov)
+    faces["negx"] = get_face(image, face_size, np.array([-1., 0., 0.]), np.array([0., -1., 0.]), fov)
 
-    faces["posy"] = get_face(image, face_size, np.array([0., 1., 0.]),  np.array([0., 0., 1.]))
-    faces["negy"] = get_face(image, face_size, np.array([0., -1., 0.]), np.array([0., 0., -1.]))
+    faces["posy"] = get_face(image, face_size, np.array([0., 1., 0.]),  np.array([0., 0., 1.]), fov)
+    faces["negy"] = get_face(image, face_size, np.array([0., -1., 0.]), np.array([0., 0., -1.]), fov)
 
-    faces["posz"] = get_face(image, face_size, np.array([0., 0., 1.]),  np.array([0., -1., 0.]))
-    faces["negz"] = get_face(image, face_size, np.array([0., 0., -1.]), np.array([0., -1., 0.]))
+    faces["posz"] = get_face(image, face_size, np.array([0., 0., 1.]),  np.array([0., -1., 0.]), fov)
+    faces["negz"] = get_face(image, face_size, np.array([0., 0., -1.]), np.array([0., -1., 0.]), fov)
 
     return faces
 
 def convert_cubemap(
     save_dir: str,
-    face_size: int
+    face_size: int,
+    fov: float
 )-> None:
+    assert 0 < fov < 180, "Field of view must be in (0, 180)."
     dataset = StreetViewDataset(save_dir)
 
     new_save_dir = os.path.join(save_dir, "cubemap")
@@ -111,7 +118,7 @@ def convert_cubemap(
         image = dataset.get(i)
         image = np.array(image) # (H, W, C), 0~255 uint8 
 
-        faces = equirect_to_cubemap(image, face_size)
+        faces = equirect_to_cubemap(image, face_size, fov)
 
         for key, face in faces.items():
             save_path = os.path.join(new_save_dir, f"{i}_{key}.png")
@@ -129,7 +136,9 @@ if __name__ == "__main__":
                         help="Directory to save cubemap images and/or cache dataset")
     parser.add_argument("--face_size", type=int, default=512,
                         help="Resolution of each cubemap face (default: 512)")
+    parser.add_argument("--fov", type=float, default=95,
+                        help="Field of view of each cubemap face (default 95)")
     
     args = parser.parse_args()
 
-    convert_cubemap(args.save_dir, args.face_size)
+    convert_cubemap(args.save_dir, args.face_size, args.fov)

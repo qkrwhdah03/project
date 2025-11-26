@@ -3,9 +3,31 @@ import numpy as np
 from PIL import Image
 from scipy.spatial.transform import Rotation as R
 
+def postprocess_image(image, fov = 95)-> np.array:
+    H, W = image.shape[:2]
+    
+    theta = fov / 2
+    theta = theta * np.pi / 180
+    ratio = 1 / np.tan(theta)
+
+    new_w = int(W * ratio)
+    new_h = int(H * ratio)
+
+    x1 = (W - new_w) // 2
+    y1 = (H - new_h) // 2
+    x2 = x1 + new_w
+    y2 = y1 + new_h
+
+    cropped = image[y1:y2, x1:x2, :]
+    resized = np.array(Image.fromarray(cropped).resize((W, H), Image.BICUBIC))
+
+    return resized
+
 def read_image(path: str)-> np.array:
     img = Image.open(path).convert("RGB")
-    return np.array(img)
+    img = np.array(img) # (H, W, 3)
+    img = postprocess_image(img) # (H, W, 3)
+    return img
 
 def wait():
     while True:

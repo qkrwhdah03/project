@@ -1,0 +1,95 @@
+`torch_dtype` is deprecated! Use `dtype` instead!
+============================================================
+🚀 Training Initialization - Memory Tracking
+============================================================
+  [Initial] GPU Memory - Allocated: 0.00GB, Reserved: 0.00GB, Max: 0.00GB
+
+📥 Step 1: Loading VAE...
+  [VAE loaded (CPU)] GPU Memory - Allocated: 0.00GB, Reserved: 0.00GB, Max: 0.00GB
+  Moving VAE to GPU...
+  [VAE moved to GPU] GPU Memory - Allocated: 0.16GB, Reserved: 0.17GB, Max: 0.16GB
+  [VAE configured] GPU Memory - Allocated: 0.16GB, Reserved: 0.17GB, Max: 0.16GB
+✅ VAE loaded successfully
+
+📥 Step 2: Loading UNet...
+  [UNet loaded (CPU)] GPU Memory - Allocated: 0.16GB, Reserved: 0.17GB, Max: 0.16GB
+  Moving UNet to GPU...
+  [UNet moved to GPU] GPU Memory - Allocated: 5.04GB, Reserved: 5.20GB, Max: 5.04GB
+  [UNet configured] GPU Memory - Allocated: 5.04GB, Reserved: 5.20GB, Max: 5.04GB
+✅ UNet loaded successfully
+
+📥 Step 3: Loading tokenizers and text encoders...
+  [Tokenizers loaded] GPU Memory - Allocated: 5.04GB, Reserved: 5.20GB, Max: 5.04GB
+  Loading text_encoder_1...
+  [text_encoder_1 loaded (CPU)] GPU Memory - Allocated: 5.04GB, Reserved: 5.20GB, Max: 5.04GB
+  [text_encoder_1 moved to GPU] GPU Memory - Allocated: 5.28GB, Reserved: 5.39GB, Max: 5.28GB
+  Loading text_encoder_2...
+  [text_encoder_2 loaded (CPU)] GPU Memory - Allocated: 5.28GB, Reserved: 5.39GB, Max: 5.28GB
+  [text_encoder_2 moved to GPU] GPU Memory - Allocated: 6.57GB, Reserved: 6.81GB, Max: 6.57GB
+  [Text encoders configured] GPU Memory - Allocated: 6.57GB, Reserved: 6.81GB, Max: 6.57GB
+✅ Text encoders loaded successfully
+
+📥 Step 4: Loading ControlNet and DeltaEmbedder...
+  Creating ControlNet...
+🔧 Loading & Modifying ControlNet from diffusers/controlnet-depth-sdxl-1.0...
+✅ ControlNet is now 6-channel ready.
+  [ControlNet created (CPU)] GPU Memory - Allocated: 6.57GB, Reserved: 6.81GB, Max: 6.57GB
+  Moving ControlNet to GPU...
+  [ControlNet moved to GPU] GPU Memory - Allocated: 11.28GB, Reserved: 11.57GB, Max: 11.28GB
+  Converting ControlNet to float16...
+  [ControlNet converted to float16] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+  Creating DeltaEmbedder...
+  [DeltaEmbedder created (CPU)] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+  Moving DeltaEmbedder to GPU...
+  [DeltaEmbedder moved to GPU] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+✅ ControlNet and DeltaEmbedder loaded successfully
+
+📥 Step 5: Setting up optimizer and data...
+  [Optimizer created] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+  [Dataset and DataLoader created] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+  [Scheduler loaded] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+✅ Setup complete
+
+============================================================
+🚀 Training Start
+============================================================
+  [Before training loop] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+
+📊 Epoch 0 starting...
+  [Epoch 0 start] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+Epoch 0:   0%|          | 0/5000 [00:00<?, ?it/s]Epoch 0:   0%|          | 0/5000 [00:02<?, ?it/s]
+  [First batch start] GPU Memory - Allocated: 8.96GB, Reserved: 11.63GB, Max: 11.28GB
+  Loading batch data...
+  [Batch data loaded] GPU Memory - Allocated: 8.97GB, Reserved: 11.63GB, Max: 11.28GB
+  VAE encoding...
+  [VAE encoded] GPU Memory - Allocated: 8.97GB, Reserved: 12.15GB, Max: 11.28GB
+  Adding noise...
+  [Noise added] GPU Memory - Allocated: 8.97GB, Reserved: 12.15GB, Max: 11.28GB
+  Text encoding...
+  [Text encoded] GPU Memory - Allocated: 8.97GB, Reserved: 12.15GB, Max: 11.28GB
+  Creating control condition...
+  [Control condition created] GPU Memory - Allocated: 8.98GB, Reserved: 12.15GB, Max: 11.28GB
+  ControlNet forward...
+  [ControlNet forward done] GPU Memory - Allocated: 9.79GB, Reserved: 12.41GB, Max: 11.28GB
+  UNet forward...
+  [UNet forward done] GPU Memory - Allocated: 10.51GB, Reserved: 12.62GB, Max: 11.28GB
+  Computing loss and backward...
+  [Backward done] GPU Memory - Allocated: 11.33GB, Reserved: 12.62GB, Max: 11.51GB
+Traceback (most recent call last):
+  File "/root/ydk/project/train_dolly.py", line 368, in <module>
+    main()
+  File "/root/ydk/project/train_dolly.py", line 353, in main
+    optimizer.step()
+  File "/root/miniconda3/envs/project/lib/python3.10/site-packages/torch/optim/optimizer.py", line 485, in wrapper
+    out = func(*args, **kwargs)
+  File "/root/miniconda3/envs/project/lib/python3.10/site-packages/torch/optim/optimizer.py", line 79, in _use_grad
+    ret = func(self, *args, **kwargs)
+  File "/root/miniconda3/envs/project/lib/python3.10/site-packages/torch/optim/adam.py", line 246, in step
+    adam(
+  File "/root/miniconda3/envs/project/lib/python3.10/site-packages/torch/optim/optimizer.py", line 147, in maybe_fallback
+    return func(*args, **kwargs)
+  File "/root/miniconda3/envs/project/lib/python3.10/site-packages/torch/optim/adam.py", line 933, in adam
+    func(
+  File "/root/miniconda3/envs/project/lib/python3.10/site-packages/torch/optim/adam.py", line 757, in _multi_tensor_adam
+    exp_avg_sq_sqrt = torch._foreach_sqrt(device_exp_avg_sqs)
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 26.00 MiB. GPU 0 has a total capacity of 20.00 GiB of which 61.62 MiB is free. Including non-PyTorch memory, this process has 18.42 GiB memory in use. Of the allocated memory 17.39 GiB is allocated by PyTorch, and 528.40 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

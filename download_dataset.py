@@ -37,7 +37,7 @@ def sample_from_equirect(
 )-> np.array:
     H, W, _ = image.shape
     x = (theta + np.pi) / (2 * np.pi) * W
-    y = (phi + np.pi / 2) / np.pi * H
+    y = H - (phi + np.pi / 2) / np.pi * H
     sample = cv2.remap(
         image, 
         x.astype(np.float32), 
@@ -80,7 +80,7 @@ def get_face(
     z = rays[:,:,2] # (face_size, face_size)
 
     theta = np.arctan2(y, x)
-    phi = np.arctan(z / np.sqrt(x**2 + y **2))
+    phi = np.arctan2(z, np.sqrt(x**2 + y **2))
 
     face = sample_from_equirect(image, theta, phi)
     return face
@@ -92,14 +92,14 @@ def equirect_to_cubemap(
 )-> Dict[str, np.array]:
     faces = {}
 
-    faces["posx"] = get_face(image, face_size, np.array([1., 0., 0.]),  np.array([0., -1., 0.]), fov)
-    faces["negx"] = get_face(image, face_size, np.array([-1., 0., 0.]), np.array([0., -1., 0.]), fov)
+    faces["posx"] = get_face(image, face_size, np.array([1., 0., 0.]),  np.array([0., 0., 1.]), fov)
+    faces["negx"] = get_face(image, face_size, np.array([-1., 0., 0.]), np.array([0., 0., 1.]), fov)
 
     faces["posy"] = get_face(image, face_size, np.array([0., 1., 0.]),  np.array([0., 0., 1.]), fov)
-    faces["negy"] = get_face(image, face_size, np.array([0., -1., 0.]), np.array([0., 0., -1.]), fov)
+    faces["negy"] = get_face(image, face_size, np.array([0., -1., 0.]), np.array([0., 0., 1.]), fov)
 
-    faces["posz"] = get_face(image, face_size, np.array([0., 0., 1.]),  np.array([0., -1., 0.]), fov)
-    faces["negz"] = get_face(image, face_size, np.array([0., 0., -1.]), np.array([0., -1., 0.]), fov)
+    faces["posz"] = get_face(image, face_size, np.array([0., 0., 1.]),  np.array([1., 0., 0.]), fov)
+    faces["negz"] = get_face(image, face_size, np.array([0., 0., -1.]), np.array([1., 0., 0.]), fov)
 
     return faces
 

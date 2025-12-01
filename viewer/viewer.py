@@ -46,19 +46,19 @@ class CubeMapViewer:
         self.pos = {
             "posx": np.array([self.cube_render_x/2, 0, 0]),
             "posy": np.array([0, self.cube_render_y/2, 0]),
-            "posz": -np.array([0, 0, self.cube_render_z/2]),
+            "posz": np.array([0, 0, self.cube_render_z/2]),
             "negx": np.array([-self.cube_render_x/2, 0, 0]),
             "negy": np.array([0, -self.cube_render_y/2, 0]),
-            "negz": -np.array([0, 0, -self.cube_render_z/2]),
+            "negz": np.array([0, 0, -self.cube_render_z/2]),
         }
 
         self.wxyz = {
-            "posx": get_face_quaternion(-np.array([1., 0., 0.]), np.array([0., -1., 0.])),
-            "posy": get_face_quaternion(-np.array([0., 1., 0.]), -np.array([0., 0., 1.])),
-            "posz": -get_face_quaternion(np.array([0., 0., 1.]), np.array([0., -1., 0.])),
-            "negx": get_face_quaternion(-np.array([-1., 0., 0.]), np.array([0., -1., 0.])),
-            "negy": get_face_quaternion(-np.array([0., -1., 0.]), -np.array([0., 0., -1.])),
-            "negz": -get_face_quaternion(np.array([0., 0., -1.]), np.array([0., -1., 0.])),
+            "posx": get_face_quaternion(np.array([1., 0., 0.]), np.array([0., 0., 1.])),
+            "posy": get_face_quaternion(np.array([0., 1., 0.]), np.array([0., 0., 1.])),
+            "posz": get_face_quaternion(np.array([0., 0., 1.]), np.array([1., 0., 0.])),
+            "negx": get_face_quaternion(np.array([-1., 0., 0.]), np.array([0., 0., 1.])),
+            "negy": get_face_quaternion(np.array([0., -1., 0.]), np.array([0., 0., 1.])),
+            "negz": get_face_quaternion(np.array([0., 0., -1.]), np.array([1., 0., 0.])),
         }
         
 

@@ -239,7 +239,7 @@ def main():
         # Face Masking (Front face vs Others)
         face_ids = torch.arange(B_batch * T, device=device) % T  
         drop_ids = torch.tensor(
-            np.random.choice(T, np.random.randint(1, T), replace=False),
+            np.random.choice(T, np.random.randint(1, T+1), replace=False),
             device=device,
             dtype=torch.long 
         )

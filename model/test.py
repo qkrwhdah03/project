@@ -24,9 +24,9 @@ def main(args):
 
     # Pretrained model name or checkpoint path
     # CHECKPOINT = "Manojb/stable-diffusion-2-base"
-    CHECKPOINT = "/root/project/results/12-03-071003/best_model.pt"
+    CHECKPOINT = args.checkpoint
 
-    CFG_SCALE = 3.5
+    CFG_SCALE = args.cfg_scale
 
     # Check device
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -117,6 +117,8 @@ if __name__ == "__main__":
     parser.add_argument("--prefix", type=str, help="Prefix of the target image to test", required=True)
     parser.add_argument("--dtype", type=str, choices=["float16", "float32"], default="float16",
                         help="Data type to use for the pipeline")
+    parser.add_argument("--checkpoint", type=str, help="Path to checkpoint pt file", required=True)
+    parser.add_argument("--cfg_scale", type=float, help="Cfg scale", default= 3.5)
     args = parser.parse_args()
 
     try:

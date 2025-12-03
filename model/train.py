@@ -320,9 +320,9 @@ def main():
                 }, best_path)
                 tqdm.write(f"  ★ New best model saved! (Loss: {avg_epoch_loss:.4f})")
 
-            # Periodic checkpoint (every save_interval_epoch)
+            # Save latest checkpoint (overwrite previous, every save_interval_epoch)
             if epoch_num % cfg.save_interval_epoch == 0:
-                save_path = os.path.join(cfg.checkpoints_dir, f"checkpoint_epoch_{epoch_num}.pt")
+                save_path = os.path.join(cfg.checkpoints_dir, "latest_checkpoint.pt")
                 torch.save({
                     'epoch': epoch_num - 1,
                     'global_step': global_step,
@@ -330,7 +330,7 @@ def main():
                     'optimizer_state_dict': optimizer.state_dict(),
                     'loss': avg_epoch_loss,
                 }, save_path)
-                tqdm.write(f"  Checkpoint saved: {save_path}\n")
+                tqdm.write(f"  Latest checkpoint saved (Epoch {epoch_num})\n")
 
     # Save Final Model
     final_path = os.path.join(cfg.checkpoints_dir, "final_cubediff.pt")

@@ -3,5 +3,10 @@
 **/__pycache__/
 
 # Generated directories
+/cache/
 /data/
 /results/
+/checkpoints/
+
+# Logs
+*.log

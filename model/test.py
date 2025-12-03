@@ -24,7 +24,7 @@ def main(args):
 
     # Pretrained model name or checkpoint path
     # CHECKPOINT = "Manojb/stable-diffusion-2-base"
-    CHECKPOINT = "hlicai/cubediff-512-imgonly"
+    CHECKPOINT = "/root/project/results/12-03-071003/best_model.pt"
 
     CFG_SCALE = 3.5
 
@@ -51,8 +51,8 @@ def main(args):
     # Load pipeline
     print("[1/4] Loading pipeline...\n")
     
-    pipeline = SD2CubeDiffPipeline.from_pretrained(
-        model_name_or_path=CHECKPOINT,
+    pipeline = SD2CubeDiffPipeline.load_checkpoint(
+        checkpoint_path=CHECKPOINT,
         dtype=dtype,
     ).to(device)
 

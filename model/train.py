@@ -5,6 +5,7 @@
 
 import os
 import time
+from datetime import datetime
 import numpy as np
 import torch
 import torch.nn as nn
@@ -27,7 +28,11 @@ class Config:
         # Model and data paths
         self.model_id = "Manojb/stable-diffusion-2-base"
         self.data_dir = "/root/project/data/cubemap"
-        self.checkpoints_dir = "/root/project/checkpoints"
+        
+        timestamp = datetime.now().strftime("%m-%d-%H%M%S")
+        self.results_dir = f"/root/project/results/{timestamp}"
+        self.checkpoints_dir = self.results_dir
+        
         self.resume_checkpoint = None
 
         # Training settings
@@ -157,6 +162,9 @@ def main():
 
     # Training losses for averaging
     train_losses = []
+    
+    # Best model tracking
+    best_loss = float('inf')
 
     # Main training loop with tqdm
     pbar = tqdm(range(start_iteration, total_iterations), desc="Training", initial=start_iteration, total=total_iterations)
@@ -299,6 +307,20 @@ def main():
             avg_epoch_loss = sum(epoch_losses) / len(epoch_losses)
             tqdm.write(f"\n  Epoch {epoch_num} Finished. Avg Loss: {avg_epoch_loss:.4f}")
 
+            # Save best model (overwrite if loss improved)
+            if avg_epoch_loss < best_loss:
+                best_loss = avg_epoch_loss
+                best_path = os.path.join(cfg.checkpoints_dir, "best_model.pt")
+                torch.save({
+                    'epoch': epoch_num - 1,
+                    'global_step': global_step,
+                    'model_state_dict': pipeline.unet.state_dict(),
+                    'optimizer_state_dict': optimizer.state_dict(),
+                    'loss': avg_epoch_loss,
+                }, best_path)
+                tqdm.write(f"  ★ New best model saved! (Loss: {avg_epoch_loss:.4f})")
+
+            # Periodic checkpoint (every save_interval_epoch)
             if epoch_num % cfg.save_interval_epoch == 0:
                 save_path = os.path.join(cfg.checkpoints_dir, f"checkpoint_epoch_{epoch_num}.pt")
                 torch.save({
@@ -311,11 +333,13 @@ def main():
                 tqdm.write(f"  Checkpoint saved: {save_path}\n")
 
     # Save Final Model
-    final_path = os.path.join(cfg.checkpoints_dir, "cubediff_final.pt")
+    final_path = os.path.join(cfg.checkpoints_dir, "final_cubediff.pt")
     torch.save(pipeline.unet.state_dict(), final_path)
     
-    print(f"\nTraining completed! Final model saved to: {final_path}")
-    print(f"Results saved to: {cfg.checkpoints_dir}")
+    print(f"\nTraining completed!")
+    print(f"  Final model: {final_path}")
+    print(f"  Best model:  {os.path.join(cfg.checkpoints_dir, 'best_model.pt')} (Loss: {best_loss:.4f})")
+    print(f"  Results dir: {cfg.checkpoints_dir}")
 
     return 0 # Success
 

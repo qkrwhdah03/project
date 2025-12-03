@@ -349,7 +349,7 @@ def main():
 
     # Save Final Model
     final_path = os.path.join(cfg.checkpoints_dir, "final_cubediff.pt")
-    torch.save(pipeline.unet.state_dict(), final_path)
+    torch.save({'model_state_dict': pipeline.unet.state_dict()}, final_path)
     
     print(f"\nTraining completed!")
     print(f"  Final model: {final_path}")

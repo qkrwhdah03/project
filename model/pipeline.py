@@ -37,6 +37,22 @@ class SD2CubeDiffPipelineOutput(BaseOutput):
     equirectangular: np.ndarray
 
 class SD2CubeDiffPipeline(StableDiffusionPipeline):
+    
+    @classmethod
+    def load_checkpoint(cls, checkpoint_path: str, **kwargs):
+        # Pretrained model or checkpoint
+        pipeline = super().from_pretrained("Manojb/stable-diffusion-2-base", **kwargs)
+        # Patch UNet to CubeDiff architecture
+        patch_unet(pipeline.unet, in_channels=7)
+        # Apply synchronized GroupNorm
+        patch_groupnorm(pipeline.vae)
+
+        ckpt = torch.load(checkpoint_path, map_location="cpu")
+        pipeline.unet.load_state_dict(ckpt["model_state_dict"])
+
+        return pipeline
+
+
     @classmethod
     def from_pretrained(cls, model_name_or_path: str = "Manojb/stable-diffusion-2-base", **kwargs):
         # Pretrained model or checkpoint

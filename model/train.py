@@ -4,7 +4,7 @@
 # NOTE: Cited from https://github.com/Juan5713/OpenCubeDiff/ (Open source)
 
 import os
-import time
+
 from datetime import datetime
 import numpy as np
 import torch
@@ -14,11 +14,23 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 from diffusers import DDIMScheduler
 from tqdm import tqdm
+from matplotlib import pyplot as plt
 
 from modules.dataset import CubemapDataset
 from pipeline import SD2CubeDiffPipeline
 from modules.additional_channels import make_extra_channels_tensor
 
+def plot_train_loss(train_losses, save_path):
+    plt.figure(figsize=(8, 5))
+    plt.plot(range(1, len(train_losses)+1), train_losses, label="Train Loss")
+    plt.xlabel("Iteration")
+    plt.ylabel("Loss")
+    plt.title("Training Loss Over Iterations")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.savefig(save_path)
+    plt.close()
+    return 
 
 class Config:
     """
@@ -299,6 +311,9 @@ def main():
             step_in_epoch = (iteration + 1) % steps_per_epoch
             tqdm.write(f"Iteration {iteration+1}/{total_iterations}, Epoch {current_epoch_num}, "
                       f"Step {step_in_epoch}/{steps_per_epoch}, Loss: {loss_val:.4f}, Avg Loss: {avg_loss:.4f}")
+            
+            # Plot & Save Loss Figure
+            plot_train_loss(train_losses, os.path.join(cfg.checkpoints_dir, "loss.png"))
 
         # Save Checkpoint at epoch boundaries
         if (iteration + 1) % steps_per_epoch == 0:

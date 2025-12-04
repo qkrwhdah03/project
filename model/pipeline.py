@@ -70,14 +70,13 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
     @torch.no_grad()
     def __call__(
         self,
-        # prompts: Union[str, List[str]],        # Prompts for text conditioning
-        *,
-        conditioning_image: torch.Tensor,      # (C,H,W)
-        conditioning_face: str = "front",  # "front", "back", "left", "right", "top", "bottom"
+        conditioning_images: List[torch.Tensor],      # (C,H,W)
+        conditioning_faces: List[str] = ["posx"],  # "posx", "posy", "posz", "negx", "negy", "negz"
         num_inference_steps: int = 50,
-        generator: Optional[torch.Generator] = None,
         cfg_scale: float = 3.5,
     ):
+        assert len(conditioning_images) == len(conditioning_faces)
+
         device = self._execution_device
         
         # Unconditional guidance
@@ -93,29 +92,31 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         self.scheduler.set_timesteps(num_inference_steps, device=device)
         latents = torch.randn(
             (6, 4, self.image_size//8, self.image_size//8),
-            generator=generator,
             device=device,
             dtype= self.unet.dtype,
         )
         latents *= self.scheduler.init_noise_sigma
 
+        uncond_latents = latents.clone()
+
         # Conditioning image (Reference for the generation process)
-        if conditioning_image.ndim == 3:
-            conditioning_image = conditioning_image.unsqueeze(0)  # Add batch dimension
-        conditioning_image = conditioning_image.to(device, dtype=self.unet.dtype)
+        for i, conditioning_image in enumerate(conditioning_images):
+            if conditioning_image.ndim == 3:
+                conditioning_image = conditioning_image.unsqueeze(0)
+            conditioning_image = conditioning_image.to(device, dtype=self.unet.dtype)
+            conditioning_images[i] = conditioning_image
 
         # Reference latent for the conditioning face
-        ref_lat = self.vae.encode(conditioning_image).latent_dist.mean[0]
-        ref_lat *= self.vae.config.scaling_factor
+        ref_lats = []
+        for conditioning_image in conditioning_images:
+            ref_lat = self.vae.encode(conditioning_image).latent_dist.mean[0]
+            ref_lat *= self.vae.config.scaling_factor
+            ref_lats.append(ref_lat)
 
         # Face to index mapping
-        face_to_index = {"front": 0,  "left": 1, "top": 2, "back": 3, "right":4, "bottom": 5}
-        conditioning_index = face_to_index[conditioning_face]
-
-        # Extend tensor channels for extra conditions
-        # drop_ids = faces to generate (mask=0), conditioning face should have mask=1
-        all_faces = set(range(6))
-        drop_ids = torch.tensor(list(all_faces - {conditioning_index}))
+        face_to_index = {"posx": 0,  "posy": 1, "posz": 2, "negx": 3, "negy":4, "negz": 5}
+        conditioning_index = [face_to_index[face] for face in conditioning_faces ]
+        drop_ids = torch.tensor(list(set(range(6)) - set(conditioning_index)))
         static_extra = make_extra_channels_tensor(
             batch_size=1,
             drop_ids=drop_ids,
@@ -123,39 +124,42 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         ).to(device, dtype=self.unet.dtype)
 
         for t in self.scheduler.timesteps:
-            latents[conditioning_index] = ref_lat  # Keep the conditioning face fixed
+
+            # Conditional Generation
+            for index, ref_lat in zip(conditioning_index, ref_lats):
+                latents[index] = ref_lat  # Keep the conditioning face fixed
             latents_scaled = self.scheduler.scale_model_input(latents, t)
             latents_input = torch.cat([latents_scaled, static_extra], dim=1)
 
-            # Classifier-free guidance
-            # Predict noise twice to implement classifier-free guidance
             noise_pred = self.unet(
                 latents_input,
                 t,
                 encoder_hidden_states=empty_embeddings
             ).sample
             
-            '''
+            # Unconditional Generation
+            uncond_latents_scaled = self.scheduler.scale_model_input(uncond_latents, t)
+            uncond_latents_input = torch.cat([uncond_latents_scaled, static_extra], dim=1)
             noise_pred_uncond = self.unet(
-                latents_input,
+                uncond_latents_input,
                 t,
-                # encoder_hidden_states=uncond_embeddings,
-                encoder_hidden_states=empty_embeddings,
-                cross_attention_kwargs={"front_face_drop": True}
+                encoder_hidden_states=empty_embeddings
             ).sample
-            '''
-            combined = noise_pred
 
-            # combined = noise_pred_uncond + cfg_scale * (noise_pred - noise_pred_uncond)
+            # Classifier Free-Guidance
+            combined = noise_pred_uncond + cfg_scale * (noise_pred - noise_pred_uncond)
             latents = self.scheduler.step(combined, t, latents).prev_sample
 
-        latents[conditioning_index] = ref_lat
-        # --- decode ---------------------------------------------------------
-        imgs = self.vae.decode(latents / self.vae.config.scaling_factor).sample
-        imgs = (imgs / 2 + 0.5).clamp(0, 1)
+        # Put conditioned image again before decode
+        for index, ref_lat in zip(conditioning_index, ref_lats):
+                latents[index] = ref_lat  # Keep the conditioning face fixed
         
+        # Decode predicted latent
+        imgs = self.vae.decode(latents / self.vae.config.scaling_factor).sample
+        imgs = (imgs / 2 + 0.5).clamp(0, 1) # Rescale it to [0,1]
+        
+        # Postprocess
         equirec, uncropped, cropped = postprocess_outputs(imgs)
-
         return SD2CubeDiffPipelineOutput(
             faces=uncropped,
             faces_cropped=cropped,

@@ -62,11 +62,9 @@ def main(args):
     print("[3/4] Running inference...")
     
     output = pipeline(
-        # prompts=PROMPT,
-        conditioning_image=conditioning_image.unsqueeze(0).to(device),
+        conditioning_images= [conditioning_image],
         num_inference_steps=50,
-        cfg_scale=args.cfg_scale,
-        # generator=torch.Generator(device=device).manual_seed(42),
+        cfg_scale=args.cfg_scale
     )
 
     print("[3/4] Inference completed successfully!\n")
@@ -74,18 +72,11 @@ def main(args):
     # Save results
     print("[4/4] Saving results...")
 
-    face_mapping = {
-        'front': 'posx',
-        'left': 'posy',
-        'top': 'posz',
-        'back': 'negx',
-        'right': 'negy',
-        'bottom': 'negz',
-    }
+    faces =  ["posx", "posy", "posz", "negx", "negy", "negz"]
 
-    for face_name, face_image in zip(face_mapping.keys(), output.faces_cropped):
+    for face_name, face_image in zip(faces, output.faces_cropped):
         face_image = Image.fromarray(face_image)
-        face_path = output_dir / f"{args.prefix}_{face_mapping[face_name]}.png"
+        face_path = output_dir / f"{args.prefix}_{face_name}.png"
         face_image.save(face_path)
     
     equirec_img = Image.fromarray(output.equirectangular)

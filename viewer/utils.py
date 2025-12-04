@@ -26,7 +26,7 @@ def postprocess_image(image, fov = 95)-> np.array:
 def read_image(path: str)-> np.array:
     img = Image.open(path).convert("RGB")
     img = np.array(img) # (H, W, 3)
-    img = postprocess_image(img) # (H, W, 3)
+    # img = postprocess_image(img) # (H, W, 3)
     return img
 
 def wait():

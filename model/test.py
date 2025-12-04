@@ -29,7 +29,10 @@ def main(args):
     CFG_SCALE = args.cfg_scale
 
     # Check device
-    device = "cuda" if torch.cuda.is_available() else "cpu"
+    if args.device:
+        device = args.device
+    else:
+        device = "cuda" if torch.cuda.is_available() else "cpu"
 
     print("======= Testing the pipeline... =======\n")
     
@@ -118,7 +121,9 @@ if __name__ == "__main__":
     parser.add_argument("--dtype", type=str, choices=["float16", "float32"], default="float16",
                         help="Data type to use for the pipeline")
     parser.add_argument("--checkpoint", type=str, help="Path to checkpoint pt file", required=True)
-    parser.add_argument("--cfg_scale", type=float, help="Cfg scale", default= 3.5)
+    parser.add_argument("--cfg_scale", type=float, help="Cfg scale", default=3.5)
+    parser.add_argument("--device", type=str, choices=["cuda", "cpu"], default=None,
+                        help="Device to run inference (default: auto-detect)")
     args = parser.parse_args()
 
     try:

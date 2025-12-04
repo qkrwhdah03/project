@@ -48,11 +48,11 @@ class Config:
         self.resume_checkpoint = None
 
         # Training settings
-        self.image_size = 128  # Reduced from 512 for faster training (latent: 32x32)
+        self.image_size = 512  # Reduced from 512 for faster training (latent: 32x32)
         self.fov = 95
-        self.batch_size = 16   # Increased with smaller image size
+        self.batch_size = 2   # Increased with smaller image size
         self.num_workers = 4
-        self.epochs = 100
+        self.epochs = 10
         self.learning_rate = 2e-4
         self.prediction_type = "v_prediction" # or "epsilon"
         self.seed = 42
@@ -62,7 +62,7 @@ class Config:
         self.save_interval_epoch = 5
 
         # Etc.
-        self.dtype = "float32"
+        self.dtype = "float16"
 
 cfg = Config()
 
@@ -125,6 +125,7 @@ def main():
     train_transform = transforms.Compose([
         transforms.Resize((cfg.image_size, cfg.image_size)),
         transforms.ToTensor(),
+        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
     ])
     
     dataset = CubemapDataset(
@@ -222,13 +223,6 @@ def main():
         
         with torch.no_grad():
             encoder_hidden_states = pipeline.text_encoder(text_input_ids)[0]
-        '''
-        '''
-        encoder_hidden_states = torch.zeros(
-            (B_batch * T, 77, pipeline.unet.config.cross_attention_dim),
-            device=device,
-            dtype=latents.dtype  # Match dtype with latents
-        )
         '''
         empty_inputs = pipeline.tokenizer(
             [""] * (B_batch * T),  # Must match batch dimension of latent_input

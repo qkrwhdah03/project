@@ -50,10 +50,8 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         with open(config_path, "r") as f:
             config = json.load(f)
 
-        pipeline.image_size = config.image_size
-        pipeline.fov = config.fov
-        pipeline.dtype = config.dtype
-        
+        pipeline.image_size = config["image_size"]
+        pipeline.fov = config["fov"]
         return pipeline
 
 
@@ -121,7 +119,7 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
             (T, 4, self.image_size//8, self.image_size//8),
             generator=generator,
             device=device,
-            dtype=self.dtype,
+            dtype= self.unet.dtype,
         )
         latents *= self.scheduler.init_noise_sigma
 

@@ -52,6 +52,10 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
 
         pipeline.image_size = config["image_size"]
         pipeline.fov = config["fov"]
+        pipeline.prediction_type = config["prediction_type"]
+
+        pipeline.scheduler.config.prediction_type = pipeline.prediction_type
+        print(pipeline.scheduler.config.prediction_type)
         return pipeline
 
 
@@ -77,36 +81,10 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         cfg_scale: float = 3.5,
     ):
         device = self._execution_device
-        T = 6  # nubmer of faces
-
-        # Classifier-free guidance
-        # # Prepare prompts
-        # if isinstance(prompts, str):
-        #     prompts = [prompts] * T  # Copy the prompts for each face
-        # if len(prompts) != T:
-        #     raise ValueError(f"Expected 6 prompts, got {len(prompts)}")
         
-        # # Encode text prompts
-        # text_inputs = self.tokenizer(
-        #     prompts,
-        #     max_length=self.tokenizer.model_max_length,
-        #     padding="max_length",
-        #     return_tensors="pt",
-        # )
-        # encoder_hidden_states = self.text_encoder(text_inputs.input_ids.to(device))[0]
-
-        # # Encode blank prompts for unconditional guidance
-        # uncond_inputs = self.tokenizer(
-        #     [""] * T,
-        #     max_length=self.tokenizer.model_max_length,
-        #     padding="max_length",
-        #     return_tensors="pt",
-        # )
-        # uncond_embeddings = self.text_encoder(uncond_inputs.input_ids.to(device))[0]
-
         # Unconditional guidance
         empty_inputs = self.tokenizer(
-            [""] * T,
+            [""] * 6,
             max_length=self.tokenizer.model_max_length,
             padding="max_length",
             return_tensors="pt",
@@ -116,7 +94,7 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         # --- scheduler / latents -------------------------------------------
         self.scheduler.set_timesteps(num_inference_steps, device=device)
         latents = torch.randn(
-            (T, 4, self.image_size//8, self.image_size//8),
+            (6, 4, self.image_size//8, self.image_size//8),
             generator=generator,
             device=device,
             dtype= self.unet.dtype,
@@ -156,20 +134,23 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
             noise_pred = self.unet(
                 latents_input,
                 t,
-                # encoder_hidden_states=encoder_hidden_states,
                 encoder_hidden_states=empty_embeddings
             ).sample
+            
+            '''
             noise_pred_uncond = self.unet(
                 latents_input,
                 t,
                 # encoder_hidden_states=uncond_embeddings,
                 encoder_hidden_states=empty_embeddings,
+                cross_attention_kwargs={"front_face_drop": True}
             ).sample
+            '''
+            combined = noise_pred
 
-            combined = noise_pred_uncond + cfg_scale * (noise_pred - noise_pred_uncond)
-            # latents[1:] = self.scheduler.step(combined[1:], t, latents[1:]).prev_sample
             latents = self.scheduler.step(combined, t, latents).prev_sample
 
+        latents[conditioning_index] = ref_lat
         # --- decode ---------------------------------------------------------
         imgs = self.vae.decode(latents / self.vae.config.scaling_factor).sample
         imgs = (imgs / 2 + 0.5).clamp(0, 1)

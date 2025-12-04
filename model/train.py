@@ -48,11 +48,11 @@ class Config:
         self.resume_checkpoint = None
 
         # Training settings
-        self.image_size = 128  # Reduced from 512 for faster training (latent: 32x32)
+        self.image_size = 512  # Reduced from 512 for faster training (latent: 32x32)
         self.fov = 95
-        self.batch_size = 16   # Increased with smaller image size
+        self.batch_size = 1   # Increased with smaller image size
         self.num_workers = 4
-        self.epochs = 100
+        self.epochs = 10
         self.learning_rate = 2e-4
         self.prediction_type = "v_prediction" # or "epsilon"
         self.seed = 42

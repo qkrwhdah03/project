@@ -93,7 +93,7 @@ if __name__ == "__main__":
     parser.add_argument("--prefix", type=str, help="Prefix of the target image to test", required=True)
     parser.add_argument("--dtype", type=str, choices=["float16", "float32"], default="float16",
                         help="Data type to use for the pipeline")
-    parser.add_argument("--checkpoint", type=str, help="Path to checkpoint pt file", required=True)
+    parser.add_argument("--checkpoint_path", type=str, help="Path to checkpoint pt file", required=True)
     parser.add_argument("--cfg_scale", type=float, help="Cfg scale", default=3.5)
     parser.add_argument("--device", type=str, choices=["cuda", "cpu"], default=None,
                         help="Device to run inference (default: auto-detect)")

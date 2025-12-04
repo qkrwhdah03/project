@@ -57,10 +57,10 @@ def stitch_to_cubemap(cubemap_faces: np.ndarray) -> np.ndarray:
     
     cube_dict = {
         "F": cubemap_faces[0],
-        "B": cubemap_faces[1],
-        "L": cubemap_faces[2],
-        "R": cubemap_faces[3],
-        "U": cubemap_faces[4],
+        "L": cubemap_faces[1],
+        "U": cubemap_faces[2],
+        "B": cubemap_faces[3],
+        "R": cubemap_faces[4],
         "D": cubemap_faces[5]
     }
 

@@ -1,4 +1,4 @@
-from viewer import CubeMapViewer, CubeMap
+from viewer import CubeMapViewer, CubeMapReader
 
 
 if __name__ == "__main__":
@@ -23,6 +23,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     viewer = CubeMapViewer(cube_render_x= args.cube_x, cube_render_y= args.cube_y, cube_render_z= args.cube_z)
-    cubemap = CubeMap(name= args.name, dir_path= args.dir_path, prefix= args.prefix, ext = args.ext)
+    cubemap = CubeMapReader(name= args.name, dir_path= args.dir_path, prefix= args.prefix, ext = args.ext)
     viewer.add_cubemap(cubemap)
     viewer.run()

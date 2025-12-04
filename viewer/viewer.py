@@ -6,7 +6,7 @@ import numpy as np
 import viser
 
 
-class CubeMap:
+class CubeMapReader:
     def __init__(
         self,
         name: str,
@@ -80,7 +80,7 @@ class CubeMapViewer:
         }
         return
     
-    def add_cubemap(self, cubemap: CubeMap)-> None:
+    def add_cubemap(self, cubemap: CubeMapReader)-> None:
         for key in self.keys:
             self.server.scene.add_image(
                 name = f"{cubemap.name}_{key}",

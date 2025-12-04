@@ -148,6 +148,7 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
             '''
             combined = noise_pred
 
+            # combined = noise_pred_uncond + cfg_scale * (noise_pred - noise_pred_uncond)
             latents = self.scheduler.step(combined, t, latents).prev_sample
 
         latents[conditioning_index] = ref_lat

@@ -76,10 +76,10 @@ def main(args):
 
     face_mapping = {
         'front': 'posx',
-        'back': 'negx',
         'left': 'posy',
-        'right': 'negy',
         'top': 'posz',
+        'back': 'negx',
+        'right': 'negy',
         'bottom': 'negz',
     }
 

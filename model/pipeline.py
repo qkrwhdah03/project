@@ -53,9 +53,7 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         pipeline.image_size = config["image_size"]
         pipeline.fov = config["fov"]
         pipeline.prediction_type = config["prediction_type"]
-
         pipeline.scheduler.config.prediction_type = pipeline.prediction_type
-        print(pipeline.scheduler.config.prediction_type)
         return pipeline
 
 

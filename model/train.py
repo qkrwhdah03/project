@@ -4,7 +4,7 @@
 # NOTE: Cited from https://github.com/Juan5713/OpenCubeDiff/ (Open source)
 
 import os
-
+import json
 from datetime import datetime
 import numpy as np
 import torch
@@ -50,7 +50,7 @@ class Config:
         # Training settings
         self.image_size = 512  # Reduced from 512 for faster training (latent: 32x32)
         self.fov = 95
-        self.batch_size = 2   # Increased with smaller image size
+        self.batch_size = 1   # Increased with smaller image size
         self.num_workers = 4
         self.epochs = 10
         self.learning_rate = 2e-4
@@ -64,6 +64,27 @@ class Config:
         # Etc.
         self.dtype = "float16"
 
+    def to_dict(self):
+        """
+        Convert all config attributes to a serializable dictionary.
+        """
+        out = {}
+        for k, v in self.__dict__.items():
+            # torch dtype 같은 비-JSON 직렬화 타입을 처리
+            if not isinstance(v, (str, int, float, bool, list, dict, type(None))):
+                out[k] = str(v)
+            else:
+                out[k] = v
+        return out
+
+    def to_json(self, save_path: str) -> None:
+        """
+        Save configuration as a JSON file.
+        """
+        with open(save_path, "w") as f:
+            json.dump(self.to_dict(), f, indent=4)
+
+
 cfg = Config()
 
 def main():
@@ -76,6 +97,7 @@ def main():
     print(f"Device: {device}")
 
     os.makedirs(cfg.checkpoints_dir, exist_ok=True)
+    cfg.to_json(os.path.join(cfg.checkpoints_dir, "config.json"))
 
     # set_seed(cfg.seed)
     torch.manual_seed(cfg.seed)

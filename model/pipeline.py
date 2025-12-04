@@ -131,7 +131,7 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         ref_lat *= self.vae.config.scaling_factor
 
         # Face to index mapping
-        face_to_index = {"front": 0, "back": 1, "left": 2, "right": 3, "top": 4, "bottom": 5}
+        face_to_index = {"front": 0,  "left": 1, "top": 2, "back": 3, "right":4, "bottom": 5}
         conditioning_index = face_to_index[conditioning_face]
 
         # Extend tensor channels for extra conditions
@@ -162,7 +162,6 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
                 t,
                 # encoder_hidden_states=uncond_embeddings,
                 encoder_hidden_states=empty_embeddings,
-                cross_attention_kwargs={"drop_face_index": conditioning_index},
             ).sample
 
             combined = noise_pred_uncond + cfg_scale * (noise_pred - noise_pred_uncond)

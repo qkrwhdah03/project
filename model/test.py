@@ -11,23 +11,6 @@ from PIL import Image
 from pipeline import SD2CubeDiffPipeline
 
 def main(args):
-    # Configuration for the inference in OpenCubeDiff
-    # IMAGE_FILENAME = ""
-    # PROMPTS = ""
-    # CHECKPOINT = ""
-    # OUTPUT_DIR = ""
-    # CFG_SCALE = ""
-
-    # Prompt
-    # PROMPT = "A photorealistic, high-quality image that remains consistent with the given image (Well synchronized street-view style)"
-    # PROMPT = ""
-
-    # Pretrained model name or checkpoint path
-    # CHECKPOINT = "Manojb/stable-diffusion-2-base"
-    CHECKPOINT = args.checkpoint
-
-    CFG_SCALE = args.cfg_scale
-
     # Check device
     if args.device:
         device = args.device
@@ -55,7 +38,7 @@ def main(args):
     print("[1/4] Loading pipeline...\n")
     
     pipeline = SD2CubeDiffPipeline.load_checkpoint(
-        checkpoint_path=CHECKPOINT,
+        checkpoint_path=args.checkpoint,
         dtype=dtype,
     ).to(device)
 
@@ -64,9 +47,8 @@ def main(args):
     # Load and preprocess target image
     print("[2/4] Loading target image...")
 
-    image_size = pipeline.vae.config.sample_size
     transform = transforms.Compose([
-        transforms.Resize((image_size, image_size)),
+        transforms.Resize((pipeline.image_size, pipeline.image_size)),
         transforms.ToTensor(),
         transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
     ])
@@ -83,7 +65,7 @@ def main(args):
         # prompts=PROMPT,
         conditioning_image=conditioning_image.unsqueeze(0).to(device),
         num_inference_steps=50,
-        cfg_scale=CFG_SCALE,
+        cfg_scale=args.cfg_scale,
         # generator=torch.Generator(device=device).manual_seed(42),
     )
 

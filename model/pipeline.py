@@ -3,6 +3,8 @@
 
 # NOTE: Cited from https://github.com/Juan5713/OpenCubeDiff/ (Open source)
 
+import os
+import json
 import torch
 import numpy as np
 from typing import Union, List, Optional
@@ -39,17 +41,19 @@ class SD2CubeDiffPipelineOutput(BaseOutput):
 class SD2CubeDiffPipeline(StableDiffusionPipeline):
     
     @classmethod
-    def load_checkpoint(cls, checkpoint_path: str, **kwargs):
-        # Pretrained model or checkpoint
-        pipeline = super().from_pretrained("Manojb/stable-diffusion-2-base", **kwargs)
-        # Patch UNet to CubeDiff architecture
-        patch_unet(pipeline.unet, in_channels=7)
-        # Apply synchronized GroupNorm
-        patch_groupnorm(pipeline.vae)
-
+    def load_checkpoint(cls, checkpoint_path: str, model_name_or_path: str = "Manojb/stable-diffusion-2-base", **kwargs):
+        pipeline = cls.from_pretrained(model_name_or_path, **kwargs)
         ckpt = torch.load(checkpoint_path, map_location="cpu")
         pipeline.unet.load_state_dict(ckpt["model_state_dict"])
 
+        config_path = os.path.join(os.path.dirname(checkpoint_path), "config.json")
+        with open(config_path, "r") as f:
+            config = json.load(f)
+
+        pipeline.image_size = config.image_size
+        pipeline.fov = config.fov
+        pipeline.dtype = config.dtype
+        
         return pipeline
 
 
@@ -114,10 +118,10 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         # --- scheduler / latents -------------------------------------------
         self.scheduler.set_timesteps(num_inference_steps, device=device)
         latents = torch.randn(
-            (T, 4, self.unet.config.sample_size, self.unet.config.sample_size),
+            (T, 4, self.image_size//8, self.image_size//8),
             generator=generator,
             device=device,
-            dtype=self.unet.dtype,
+            dtype=self.dtype,
         )
         latents *= self.scheduler.init_noise_sigma
 
@@ -141,7 +145,7 @@ class SD2CubeDiffPipeline(StableDiffusionPipeline):
         static_extra = make_extra_channels_tensor(
             batch_size=1,
             drop_ids=drop_ids,
-            face_size=self.unet.config.sample_size,
+            face_size= self.image_size//8,
         ).to(device, dtype=self.unet.dtype)
 
         for t in self.scheduler.timesteps:

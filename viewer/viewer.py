@@ -1,5 +1,11 @@
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
+
 from typing import List
-from utils import wait, read_image, get_face_quaternion
+from viewer.utils import wait, read_image, get_face_quaternion
 
 import os
 import numpy as np
@@ -37,6 +43,34 @@ class CubeMapViewer:
     )-> None:
         assert len(keys) == 6
         self.server = viser.ViserServer(host="0.0.0.0", port=8080)
+        @self.server.on_client_connect
+        def _(client: viser.ClientHandle) -> None:
+            step = 10
+            
+            posx_button_handle = client.gui.add_button("Move +x")
+            @posx_button_handle.on_click
+            def _(_):
+                client.camera.position = client.camera.position + np.array([step, 0.0, 0.0])
+
+            negx_button_handle = client.gui.add_button("Move -x")
+            @negx_button_handle.on_click
+            def _(_):
+                client.camera.position = client.camera.position + np.array([-step, 0.0, 0.0])
+            
+            posy_button_handle = client.gui.add_button("Move +y")
+            @posy_button_handle.on_click
+            def _(_):
+                client.camera.position = client.camera.position + np.array([0.0, step, 0.0])
+            
+            negy_button_handle = client.gui.add_button("Move -y")
+            @negy_button_handle.on_click
+            def _(_):
+                client.camera.position = client.camera.position + np.array([0.0, -step, 0.0])
+
+           
+
+                    
+
         self.cube_render_x = cube_render_x
         self.cube_render_y = cube_render_y
         self.cube_render_z = cube_render_z
@@ -78,9 +112,14 @@ class CubeMapViewer:
             "negy": self.cube_render_z,
             "negz": self.cube_render_y
         }
+
         return
     
-    def add_cubemap(self, cubemap: CubeMapReader)-> None:
+    def add_cubemap(
+        self, 
+        cubemap: CubeMapReader,
+        origin: np.array = np.array([0., 0., 0.])
+        )-> None:
         for key in self.keys:
             self.server.scene.add_image(
                 name = f"{cubemap.name}_{key}",
@@ -88,7 +127,7 @@ class CubeMapViewer:
                 render_width = self.width[key],
                 render_height = self.height[key],
                 wxyz = self.wxyz[key],
-                position = self.pos[key],
+                position = self.pos[key] + origin,
                 visible = True
             )
         return

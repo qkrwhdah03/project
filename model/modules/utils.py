@@ -6,7 +6,7 @@
 import torch
 import torch.nn as nn
 from diffusers import UNet2DConditionModel
-from .attention import swap_transformer_blocks
+from model.modules.attention import swap_transformer_blocks
 
 def freeze(module: nn.Module) -> None:
     """

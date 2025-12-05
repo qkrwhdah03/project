@@ -2,6 +2,7 @@ import numpy as np
 import py360convert
 from math import tan, radians
 import torch
+import cv2
 
 def crop_image_by_fov(image: np.ndarray, input_fov_deg: float, crop_fov_deg: float) -> np.ndarray:
     """
@@ -38,7 +39,9 @@ def crop_image_by_fov(image: np.ndarray, input_fov_deg: float, crop_fov_deg: flo
 
     # Crop the image
     cropped_image = image[start:end, start:end]
-    return cropped_image
+    resized_image = cv2.resize(cropped_image, (W, W), interpolation=cv2.INTER_LINEAR)
+
+    return resized_image
 
 
 def stitch_to_cubemap(cubemap_faces: np.ndarray) -> np.ndarray:

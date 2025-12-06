@@ -67,10 +67,6 @@ class CubeMapViewer:
             def _(_):
                 client.camera.position = client.camera.position + np.array([0.0, -step, 0.0])
 
-           
-
-                    
-
         self.cube_render_x = cube_render_x
         self.cube_render_y = cube_render_y
         self.cube_render_z = cube_render_z

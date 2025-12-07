@@ -2,6 +2,11 @@
 # Training code for CubeDiff (Stable Diffusion 2)
 
 # NOTE: Cited from https://github.com/Juan5713/OpenCubeDiff/ (Open source)
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 import os
 import json
@@ -16,9 +21,9 @@ from diffusers import DDIMScheduler
 from tqdm import tqdm
 from matplotlib import pyplot as plt
 
-from modules.dataset import CubemapDataset
-from pipeline import SD2CubeDiffPipeline
-from modules.additional_channels import make_extra_channels_tensor
+from model.modules.dataset import CubemapDataset
+from model.pipeline import SD2CubeDiffPipeline
+from model.modules.additional_channels import make_extra_channels_tensor
 
 def plot_train_loss(train_losses, save_path):
     plt.figure(figsize=(8, 5))
@@ -52,7 +57,7 @@ class Config:
         self.fov = 95
         self.batch_size = 1   # Increased with smaller image size
         self.num_workers = 4
-        self.epochs = 10
+        self.epochs = 20
         self.learning_rate = 2e-4
         self.prediction_type = "v_prediction" # or "epsilon"
         self.seed = 42

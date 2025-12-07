@@ -1,14 +1,17 @@
 # model/test.py
 # Test the pipeline
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 import torch
 from torchvision import transforms
 
 import argparse
-import sys
-from pathlib import Path
 from PIL import Image
-from pipeline import SD2CubeDiffPipeline
+from model.pipeline import SD2CubeDiffPipeline
 
 def main(args):
     # Check device
@@ -94,7 +97,7 @@ if __name__ == "__main__":
     parser.add_argument("--dtype", type=str, choices=["float16", "float32"], default="float16",
                         help="Data type to use for the pipeline")
     parser.add_argument("--checkpoint_path", type=str, help="Path to checkpoint pt file", required=True)
-    parser.add_argument("--cfg_scale", type=float, help="Cfg scale", default=1.0)
+    parser.add_argument("--cfg_scale", type=float, help="Cfg scale", default=1.5)
     parser.add_argument("--device", type=str, choices=["cuda", "cpu"], default=None,
                         help="Device to run inference (default: auto-detect)")
     args = parser.parse_args()

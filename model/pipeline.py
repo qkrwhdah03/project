@@ -2,6 +2,11 @@
 # Entire pipeline for CubeDiff (Stable Diffusion 2)
 
 # NOTE: Cited from https://github.com/Juan5713/OpenCubeDiff/ (Open source)
+import sys
+from pathlib import Path
+
+project_root = Path(__file__).parent.parent
+sys.path.insert(0, str(project_root))
 
 import os
 import json
@@ -12,11 +17,11 @@ from diffusers import StableDiffusionPipeline
 from diffusers.pipelines.stable_diffusion.pipeline_output import BaseOutput
 from dataclasses import dataclass
 
-from modules.additional_channels import make_extra_channels_tensor
-from modules.attention import swap_transformer_blocks
-from modules.group_norm import patch_groupnorm
-from modules.utils import patch_unet
-from modules.postprocess import postprocess_outputs
+from model.modules.additional_channels import make_extra_channels_tensor
+from model.modules.attention import swap_transformer_blocks
+from model.modules.group_norm import patch_groupnorm
+from model.modules.utils import patch_unet
+from model.modules.postprocess import postprocess_outputs
 
 # Stable diffusion 2
 '''

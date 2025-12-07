@@ -7,6 +7,7 @@
 /data/
 /results/
 /checkpoints/
+/forward_warp/depth_estimator
 
 # Logs
 *.log
